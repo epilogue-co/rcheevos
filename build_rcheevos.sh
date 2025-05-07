@@ -4,6 +4,7 @@ set -euo pipefail
 BUILD_DIR="build"
 INSTALL_LIB_DIR="lib"
 BUILD_TYPE="Release"
+DEFAULT_MACOS_DEPLOYMENT_TARGET="12.0"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_ABS_PATH="${SCRIPT_DIR}/${BUILD_DIR}"
@@ -14,7 +15,17 @@ mkdir -p "${BUILD_ABS_PATH}"
 cd "${BUILD_ABS_PATH}"
 
 echo "Configuring CMake..."
-cmake "${SCRIPT_DIR}" -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+CMAKE_ARGS=("-DCMAKE_BUILD_TYPE=${BUILD_TYPE}")
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    MACOS_TARGET_VERSION="${MACOS_DEPLOYMENT_TARGET_FOR_RCHEEVOS:-${DEFAULT_MACOS_DEPLOYMENT_TARGET}}"
+    echo "macOS detected. Configuring for universal (arm64;x86_64) build."
+    echo "Using macOS Deployment Target: ${MACOS_TARGET_VERSION}"
+    CMAKE_ARGS+=("-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64")
+    CMAKE_ARGS+=("-DCMAKE_OSX_DEPLOYMENT_TARGET=${MACOS_TARGET_VERSION}")
+fi
+
+cmake "${SCRIPT_DIR}" "${CMAKE_ARGS[@]}"
 if [ $? -ne 0 ]; then echo "CMake configuration failed"; exit 1; fi
 
 echo "Compiling..."
@@ -22,7 +33,6 @@ cmake --build . --config "${BUILD_TYPE}" --parallel
 if [ $? -ne 0 ]; then echo "Build failed"; exit 1; fi
 
 cd "${SCRIPT_DIR}"
-
 mkdir -p "${INSTALL_LIB_ABS_PATH}"
 
 RCHEEVOS_LIB_CONFIG_SUBDIR="${BUILD_ABS_PATH}/${BUILD_TYPE}"
