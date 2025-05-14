@@ -3,11 +3,57 @@ set -euo pipefail
 
 BUILD_DIR="build"
 INSTALL_LIB_DIR="lib"
+INCLUDE_DIR="include"
 BUILD_TYPE="Release"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_ABS_PATH="${SCRIPT_DIR}/${BUILD_DIR}"
 INSTALL_LIB_ABS_PATH="${SCRIPT_DIR}/${INSTALL_LIB_DIR}"
+TARGET_INCLUDE_ABS_PATH="${SCRIPT_DIR}/${INCLUDE_DIR}"
+LIBRETRO_H_SOURCE_DIR_INPUT=""
+
+
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    case $key in
+        --lhp)
+        LIBRETRO_H_SOURCE_DIR_INPUT="$2"
+        shift
+        shift
+        ;;
+        *)
+        shift
+        ;;
+    esac
+done
+
+LIBRETRO_H_FILENAME="libretro.h"
+LIBRETRO_H_SOURCE_FILE_PATH=""
+
+if [ -n "${LIBRETRO_H_SOURCE_DIR_INPUT}" ]; then
+    if [[ "${LIBRETRO_H_SOURCE_DIR_INPUT}" = /* ]]; then
+        LIBRETRO_H_SOURCE_DIR_RESOLVED="${LIBRETRO_H_SOURCE_DIR_INPUT}"
+    else
+        LIBRETRO_H_SOURCE_DIR_RESOLVED="$(cd "$(pwd)/${LIBRETRO_H_SOURCE_DIR_INPUT}" && pwd)"
+    fi
+    LIBRETRO_H_SOURCE_FILE_PATH="${LIBRETRO_H_SOURCE_DIR_RESOLVED}/${LIBRETRO_H_FILENAME}"
+else
+    DEFAULT_LIBRETRO_H_SOURCE_DIR_RESOLVED="$(cd "${SCRIPT_DIR}/../../src" && pwd)"
+    LIBRETRO_H_SOURCE_FILE_PATH="${DEFAULT_LIBRETRO_H_SOURCE_DIR_RESOLVED}/${LIBRETRO_H_FILENAME}"
+fi
+
+echo "Preparing to copy ${LIBRETRO_H_FILENAME}..."
+echo "Source path: ${LIBRETRO_H_SOURCE_FILE_PATH}"
+echo "Target directory: ${TARGET_INCLUDE_ABS_PATH}"
+
+if [ ! -f "${LIBRETRO_H_SOURCE_FILE_PATH}" ]; then
+    echo "Error: ${LIBRETRO_H_FILENAME} not found at ${LIBRETRO_H_SOURCE_FILE_PATH}"
+    exit 1
+fi
+
+cp "${LIBRETRO_H_SOURCE_FILE_PATH}" "${TARGET_INCLUDE_ABS_PATH}/${LIBRETRO_H_FILENAME}"
+if [ $? -ne 0 ]; then echo "Error: Failed to copy ${LIBRETRO_H_FILENAME} to ${TARGET_INCLUDE_ABS_PATH}"; exit 1; fi
+echo "${LIBRETRO_H_FILENAME} copied successfully to ${TARGET_INCLUDE_ABS_PATH}"
 
 echo "Building rcheevos library..."
 mkdir -p "${BUILD_ABS_PATH}"
