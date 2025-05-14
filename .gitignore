@@ -66,3 +66,8 @@ validator/validator
 
 # Swift Package Manager
 .swiftpm/
+
+# Playback specific
+build/
+.DS_Store
+libretro.h
