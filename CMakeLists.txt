@@ -17,7 +17,6 @@ add_library(rcheevos STATIC
     include/rc_libretro.h
     include/rc_runtime.h
     include/rc_runtime_types.h
-    include/rc_url.h
     include/rc_util.h
 
     # Core client and utilities (src/)
@@ -59,9 +58,6 @@ add_library(rcheevos STATIC
     src/rhash/aes.c
     src/rhash/hash.c
     src/rhash/md5.c
-
-    # URL utilities (src/rurl/)
-    src/rurl/url.c
 )
 
 target_include_directories(rcheevos
