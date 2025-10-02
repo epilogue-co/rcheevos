@@ -57,6 +57,11 @@ add_library(rcheevos STATIC
     src/rhash/md5.h
     src/rhash/aes.c
     src/rhash/hash.c
+    src/rhash/hash_disc.c
+    src/rhash/hash_encrypted.c
+    src/rhash/hash_rom.c
+    src/rhash/hash_zip.c
+    src/rhash/cdreader.c
     src/rhash/md5.c
 )
 
